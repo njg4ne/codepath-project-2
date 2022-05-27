@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# Codepath Student Store React Frontend
 
 To install dependencies, run:
 
