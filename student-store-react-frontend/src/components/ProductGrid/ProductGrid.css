@@ -1,0 +1,17 @@
+.ProductGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  background-color: rgb(179, 158, 141);
+  width: 100%;
+}
+
+.ProductPreview {
+  background-color: rgb(42, 20, 115);
+  width: max(240px, 40vw);
+  height: 100px;
+  margin: 1em;
+  padding: 1em;
+  border-radius: 1em;
+}

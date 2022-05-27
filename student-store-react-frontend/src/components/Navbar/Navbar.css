@@ -1,0 +1,13 @@
+h1 {
+  font-size: 2rem;
+  padding: 0.25em 0.5em;
+}
+
+header {
+  background-color: rgb(227, 80, 17);
+  border-bottom: 2px solid white;
+  border-top: 2px solid white;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
