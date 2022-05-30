@@ -2,7 +2,8 @@ import React from "react";
 import "./ProductGrid.css";
 
 import { useState, useEffect } from "react";
-import { loadProducts } from "../../data-utils/api-utils";
+import { loadProducts } from "../../utils/api-utils";
+import ProductPreview from "../ProductPreview/ProductPreview";
 
 export default function ProductGrid() {
   const [products, setProducts] = useState(undefined);
@@ -15,7 +16,7 @@ export default function ProductGrid() {
       {products
         ? products.map((p) => (
             <div className="ProductPreview" id={`prod-${p.id}`} key={p.id}>
-              {p.name}
+              {ProductPreview({ data: p })}
             </div>
           ))
         : null}
