@@ -14,6 +14,7 @@ import {
   getFormattedPrice,
   getProductDetails,
   getTaxRate,
+  sendOrder,
 } from "../../utils/api-utils";
 const testItems = [
   { name: "Cheetos", quantity: 2, unitPrice: 1.5, cost: 3 },
@@ -21,9 +22,71 @@ const testItems = [
   { name: "Cheetos", quantity: 2, unitPrice: 1.5, cost: 3 },
 ];
 
-function PlaceOrderButton({ cart }) {
+function PlaceOrderButton({ cart, products, userInfo }) {
   const [open, setOpen] = useState(false);
-  const handleClose = (event: SyntheticEvent | Event, reason?: string) => {
+  const [snackMsg, setSnackMsg] = useState("Order Not Placed");
+  /**
+   * Converts a manifest keyed by id to be keyed by name
+   * @param {object} manifest
+   * @param {Array} productLibrary
+   */
+  function productsByName(manifest, productLibrary) {
+    let toRet = { ...manifest };
+    toRet = Object.keys(toRet).reduce((obj, currId, idx) => {
+      const fullProducts = productLibrary.filter((p) => currId == p.id);
+      let name;
+      if (!fullProducts || fullProducts.length !== 1) {
+        throw `Unexpectedly found less/more than one product with id: ${currId}`;
+      } else {
+        const prod = fullProducts[0];
+        const quantity = manifest[currId];
+        obj[prod.name] = quantity;
+      }
+      return obj;
+    }, {});
+    return toRet;
+  }
+  const placeOrder = () => {
+    setSnackMsg(`Order failed- Unknown Error`);
+    if (Object.keys(cart).length === 0) {
+      setSnackMsg(`Order failed- no items in cart`);
+      setOpen(true);
+      return;
+    }
+    let cartByName;
+    try {
+      cartByName = productsByName(cart, products);
+    } catch (error) {
+      console.log(`Error: ${error}`);
+      setSnackMsg(`Order failed- ${error}`);
+      setOpen(true);
+      return;
+    }
+    const onSuccess = (msg) => {
+      if (open) {
+        setOpen(false);
+      }
+      if (!msg || !msg.receipt) {
+        setSnackMsg(`Order processing failed- try again`);
+      }
+      const receiptView = (lines) => (
+        <Stack spacing={2}>
+          <Typography variant="h5">Order Succeeded!</Typography>
+          {lines.map((line) => {
+            return <Typography variant="h6">{line}</Typography>;
+          })}
+        </Stack>
+      );
+
+      // console.log(msg);
+      setSnackMsg(receiptView(msg.receipt.lines));
+      setOpen(true);
+    };
+    setSnackMsg(`Order submitted- response pending`);
+    sendOrder(cartByName, userInfo, onSuccess);
+    setOpen(true);
+  };
+  const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
@@ -32,18 +95,18 @@ function PlaceOrderButton({ cart }) {
   const action = (
     <Paper sx={{ bgcolor: "green" }}>
       <Typography my={0.5} mx={2} variant="h6">
-        Order Not Placed!
+        {snackMsg}
       </Typography>
     </Paper>
   );
   return (
     <Stack>
-      <Button variant="contained" onClick={() => setOpen(true)}>
+      <Button variant="contained" onClick={placeOrder}>
         Place Order
       </Button>
       <Snackbar
         open={open}
-        autoHideDuration={3000}
+        autoHideDuration={5000}
         onClose={handleClose}
         // message="Note archived"
         action={action}
@@ -62,7 +125,6 @@ function CartItem({ details }) {
   useEffect(() => {
     getFormattedPrice(price, setPriceStr);
     getFormattedPrice(price * quantity, setCostStr);
-    console.log();
   }, [price, quantity]);
   return (
     <TableRow>
@@ -74,14 +136,16 @@ function CartItem({ details }) {
   );
 }
 
-export function ShoppingCart({ cart }) {
+export function ShoppingCart({ cart, products }) {
   const [cartDetails, setCartDetails] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [taxRate, setTaxRate] = useState(0);
   const [taxes, setTaxes] = useState(0);
   const [total, setTotal] = useState(0);
-  const [name, setName] = useState("John Doe");
-  const [email, setEmail] = useState("j.doe@gmail.com");
+  const [userInfo, setUserInfo] = useState({
+    name: "John Doe",
+    email: "j.doe@gmail.com",
+  });
 
   useEffect(() => {
     getTaxRate(setTaxRate);
@@ -159,15 +223,19 @@ export function ShoppingCart({ cart }) {
             </TableRow>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell colSpan={3}>{name}</TableCell>
+              <TableCell colSpan={3}>{userInfo.name}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Email</TableCell>
-              <TableCell colSpan={3}>{email}</TableCell>
+              <TableCell colSpan={3}>{userInfo.email}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell colSpan={4}>
-                <PlaceOrderButton cart={cart} />
+                <PlaceOrderButton
+                  cart={cart}
+                  products={products}
+                  userInfo={userInfo}
+                />
               </TableCell>
             </TableRow>
           </TableBody>

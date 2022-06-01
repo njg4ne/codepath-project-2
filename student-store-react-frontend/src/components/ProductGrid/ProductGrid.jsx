@@ -7,8 +7,13 @@ import ProductPreview from "../ProductPreview/ProductPreview";
 import Card from "@mui/material/Card";
 import Paper from "@mui/material/Paper";
 
-export default function ProductGrid({ onCartChange, cart }) {
-  const [products, setProducts] = useState(undefined);
+export default function ProductGrid({
+  onCartChange,
+  cart,
+  products,
+  setProducts,
+}) {
+  // const [products, setProducts] = useState(undefined);
   useEffect(() => {
     loadProducts(setProducts);
   }, []);

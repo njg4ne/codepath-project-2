@@ -53,3 +53,16 @@ export function getTaxRate(setter) {
     })
     .catch((err) => console.log(err));
 }
+
+export function sendOrder(cart, userInfo, onSuccess) {
+  axios
+    .post(`${API_URL}store/`, {
+      cart,
+      userInfo,
+    })
+    .then((resp) => {
+      const { cart, purchase } = resp.data;
+      onSuccess(purchase);
+    })
+    .catch((err) => console.log(err));
+}
