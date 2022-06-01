@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { API_URL } from "./constants";
+import { formatPrice } from "./formatting";
 
 export function loadProducts(setter) {
   axios
@@ -35,6 +36,11 @@ export function getProductDetails(ids, setter) {
 }
 
 export function getFormattedPrice(price, setter) {
+  // Repeated code approach to format on the frontend:
+  setter(formatPrice(price));
+  return;
+
+  // Wasteful approach to call backend:
   axios
     .get(`${API_URL}store/format/${price}`)
     .then((resp) => resp.data.formatted)

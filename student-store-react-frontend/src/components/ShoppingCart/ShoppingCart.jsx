@@ -11,11 +11,11 @@ import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import { useEffect, useState, SyntheticEvent } from "react";
 import {
-  getFormattedPrice,
   getProductDetails,
   getTaxRate,
   sendOrder,
 } from "../../utils/api-utils";
+import { formatPrice } from "../../utils/formatting";
 const testItems = [
   { name: "Cheetos", quantity: 2, unitPrice: 1.5, cost: 3 },
   { name: "Cheetos", quantity: 2, unitPrice: 1.5, cost: 3 },
@@ -72,8 +72,12 @@ function PlaceOrderButton({ cart, products, userInfo }) {
       const receiptView = (lines) => (
         <Stack spacing={2}>
           <Typography variant="h5">Order Succeeded!</Typography>
-          {lines.map((line) => {
-            return <Typography variant="h6">{line}</Typography>;
+          {lines.map((line, idx) => {
+            return (
+              <Typography variant="h6" key={idx}>
+                {line}
+              </Typography>
+            );
           })}
         </Stack>
       );
@@ -119,65 +123,54 @@ function PlaceOrderButton({ cart, products, userInfo }) {
 
 function CartItem({ details }) {
   const { name, id, price, quantity } = details;
-  const [priceStr, setPriceStr] = useState(price);
-  const [costStr, setCostStr] = useState("");
+  const [cost, setCost] = useState(0);
 
   useEffect(() => {
-    getFormattedPrice(price, setPriceStr);
-    getFormattedPrice(price * quantity, setCostStr);
+    setCost(price * quantity);
   }, [price, quantity]);
   return (
     <TableRow>
       <TableCell>{name}</TableCell>
       <TableCell>{quantity}</TableCell>
-      <TableCell>{priceStr}</TableCell>
-      <TableCell>{costStr}</TableCell>
+      <TableCell>{formatPrice(price)}</TableCell>
+      <TableCell>{formatPrice(cost)}</TableCell>
     </TableRow>
   );
 }
 
-export function ShoppingCart({ cart, products }) {
+export function ShoppingCart({ cart, products, taxRate }) {
   const [cartDetails, setCartDetails] = useState([]);
-  const [subtotal, setSubtotal] = useState(0);
-  const [taxRate, setTaxRate] = useState(0);
-  const [taxes, setTaxes] = useState(0);
-  const [total, setTotal] = useState(0);
+
+  const [math, setMath] = useState({
+    subtotal: 0,
+    taxes: 0,
+    total: 0,
+  });
+
   const [userInfo, setUserInfo] = useState({
     name: "John Doe",
     email: "j.doe@gmail.com",
   });
 
   useEffect(() => {
-    getTaxRate(setTaxRate);
-  }, []);
-  useEffect(() => {
     const ids = Object.keys(cart);
     getProductDetails(ids, setCartDetails);
   }, [cart]);
+
   useEffect(() => {
     const subtotal = cartDetails.reduce((l, r) => {
       const cost = cart[r.id] * r.price;
       return l + cost;
     }, 0);
-    setSubtotal(subtotal);
-    setTaxes(taxRate * subtotal);
-    setTotal(taxRate * subtotal + subtotal);
-  }, [cart, cartDetails, taxRate]);
-  useEffect(() => {
-    if (!subtotal.includes) {
-      getFormattedPrice(subtotal, setSubtotal);
-    }
-  }, [subtotal]);
-  useEffect(() => {
-    if (!taxes.includes) {
-      getFormattedPrice(taxes, setTaxes);
-    }
-  }, [taxes]);
-  useEffect(() => {
-    if (!total.includes) {
-      getFormattedPrice(total, setTotal);
-    }
-  }, [total]);
+    const taxes = taxRate * subtotal;
+    const total = taxes + subtotal;
+    let newMath = { subtotal, taxes, total };
+    newMath = Object.keys(newMath).reduce((obj, k) => {
+      obj[k] = formatPrice(newMath[k]);
+      return obj;
+    }, {});
+    setMath(newMath);
+  }, [cartDetails, taxRate]);
 
   const quantities = Object.keys(cart).map((e) => cart[e]);
 
@@ -211,15 +204,15 @@ export function ShoppingCart({ cart, products }) {
           <TableBody>
             <TableRow>
               <TableCell colSpan={3}>Subtotal</TableCell>
-              <TableCell>{subtotal}</TableCell>
+              <TableCell>{math.subtotal}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell colSpan={3}>Taxes and Fees</TableCell>
-              <TableCell>{taxes}</TableCell>
+              <TableCell>{math.taxes}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell colSpan={3}>Total</TableCell>
-              <TableCell>{total}</TableCell>
+              <TableCell>{math.total}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Name</TableCell>

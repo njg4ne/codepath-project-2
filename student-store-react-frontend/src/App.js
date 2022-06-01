@@ -4,8 +4,8 @@ import Navbar from "./components/Navbar";
 import ProductGrid from "./components/ProductGrid";
 import Drawer from "@mui/material/Drawer";
 import { Button, Container, Typography } from "@mui/material";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { getTaxRate } from "./utils/api-utils";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { ShoppingCart } from "./components/ShoppingCart/ShoppingCart";
 
@@ -16,10 +16,16 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const [taxRate, setTaxRate] = useState(0);
   const [drawer, setDrawer] = useState(false);
   const closeDrawer = () => setDrawer(false);
   const [cart, setCart] = useState({});
   const [products, setProducts] = useState(undefined);
+
+  useEffect(() => {
+    getTaxRate(setTaxRate);
+  }, []);
+
   const updateCart = (itemID, quantityChange) => {
     let newCart = { ...cart };
     if (cart[itemID]) {
@@ -46,7 +52,7 @@ function App() {
           setProducts={setProducts}
         />
         <Drawer open={drawer} onClose={() => setDrawer(false)} anchor="left">
-          <ShoppingCart cart={cart} products={products} />
+          <ShoppingCart cart={cart} products={products} taxRate={taxRate} />
         </Drawer>
       </ThemeProvider>
     </div>
