@@ -9,92 +9,41 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
+import TextField from "@mui/material/TextField";
 import { useEffect, useState, SyntheticEvent } from "react";
-import {
-  getProductDetails,
-  getTaxRate,
-  sendOrder,
-} from "../../utils/api-utils";
+import { getProductDetails, getTaxRate } from "../../utils/api-utils";
 import { formatPrice } from "../../utils/formatting";
-const testItems = [
-  { name: "Cheetos", quantity: 2, unitPrice: 1.5, cost: 3 },
-  { name: "Cheetos", quantity: 2, unitPrice: 1.5, cost: 3 },
-  { name: "Cheetos", quantity: 2, unitPrice: 1.5, cost: 3 },
-];
+import { placeOrder } from "../../utils/order-service";
 
-function PlaceOrderButton({ cart, products, userInfo }) {
-  const [open, setOpen] = useState(false);
-  const [snackMsg, setSnackMsg] = useState("Order Not Placed");
+function PlaceOrderButton(props) {
+  return (
+    <Stack>
+      <Button variant="contained" {...props}>
+        Place Order
+      </Button>
+    </Stack>
+  );
+}
+
+function OrderingSnackbar({
+  cart,
+  products,
+  userInfo,
+  setSnackMsg,
+  snackMsg,
+  ...rest
+}) {
   /**
    * Converts a manifest keyed by id to be keyed by name
    * @param {object} manifest
    * @param {Array} productLibrary
    */
-  function productsByName(manifest, productLibrary) {
-    let toRet = { ...manifest };
-    toRet = Object.keys(toRet).reduce((obj, currId, idx) => {
-      const fullProducts = productLibrary.filter((p) => currId == p.id);
-      let name;
-      if (!fullProducts || fullProducts.length !== 1) {
-        throw `Unexpectedly found less/more than one product with id: ${currId}`;
-      } else {
-        const prod = fullProducts[0];
-        const quantity = manifest[currId];
-        obj[prod.name] = quantity;
-      }
-      return obj;
-    }, {});
-    return toRet;
-  }
-  const placeOrder = () => {
-    setSnackMsg(`Order failed- Unknown Error`);
-    if (Object.keys(cart).length === 0) {
-      setSnackMsg(`Order failed- no items in cart`);
-      setOpen(true);
-      return;
-    }
-    let cartByName;
-    try {
-      cartByName = productsByName(cart, products);
-    } catch (error) {
-      console.log(`Error: ${error}`);
-      setSnackMsg(`Order failed- ${error}`);
-      setOpen(true);
-      return;
-    }
-    const onSuccess = (msg) => {
-      if (open) {
-        setOpen(false);
-      }
-      if (!msg || !msg.receipt) {
-        setSnackMsg(`Order processing failed- try again`);
-      }
-      const receiptView = (lines) => (
-        <Stack spacing={2}>
-          <Typography variant="h5">Order Succeeded!</Typography>
-          {lines.map((line, idx) => {
-            return (
-              <Typography variant="h6" key={idx}>
-                {line}
-              </Typography>
-            );
-          })}
-        </Stack>
-      );
 
-      // console.log(msg);
-      setSnackMsg(receiptView(msg.receipt.lines));
-      setOpen(true);
-    };
-    setSnackMsg(`Order submitted- response pending`);
-    sendOrder(cartByName, userInfo, onSuccess);
-    setOpen(true);
-  };
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-    setOpen(false);
+    setSnackMsg(undefined);
   };
   const action = (
     <Paper sx={{ bgcolor: "green" }}>
@@ -104,20 +53,14 @@ function PlaceOrderButton({ cart, products, userInfo }) {
     </Paper>
   );
   return (
-    <Stack>
-      <Button variant="contained" onClick={placeOrder}>
-        Place Order
-      </Button>
-      <Snackbar
-        open={open}
-        autoHideDuration={5000}
-        onClose={handleClose}
-        // message="Note archived"
-        action={action}
-      >
-        {action}
-      </Snackbar>
-    </Stack>
+    <Snackbar
+      open={Boolean(snackMsg)}
+      autoHideDuration={5000}
+      onClose={handleClose}
+      // action={action}
+    >
+      {action}
+    </Snackbar>
   );
 }
 
@@ -138,8 +81,91 @@ function CartItem({ details }) {
   );
 }
 
-export function ShoppingCart({ cart, products, taxRate }) {
+function FormRow({
+  userInfo,
+  setUserInfo,
+  children,
+  setFormValid,
+  snackMsg,
+  setSnackMsg,
+  cart,
+  products,
+}) {
+  const [nameError, setNameError] = useState(undefined);
+  const [emailError, setEmailError] = useState(undefined);
+
+  function modify(e, field) {
+    let changed = { ...userInfo };
+    changed[field] = e.target.value;
+    setUserInfo(changed);
+  }
+  function badEmail(value) {
+    if (!value || value.trim() == "") {
+      return true;
+    }
+    const at = value.indexOf("@");
+    if (at < 1) {
+      return true;
+    }
+    const dot = value.slice(at + 1).indexOf(".");
+    if (dot < 1) {
+      return true;
+    }
+    if (value.slice(at + dot + 2).length < 2) {
+      return true;
+    }
+    return false;
+  }
+  function badName(value) {
+    if (!value || value.trim() == "") {
+      return true;
+    }
+    return !(value.trim().length > 2 && value.trim().indexOf(" ") > 0);
+  }
+  function onSubmit(e) {
+    e.preventDefault();
+    const errors = [badName(userInfo.name), badEmail(userInfo.email)];
+    setEmailError(errors[1]);
+    setNameError(errors[0]);
+    const preventOrder = errors.reduce((l, r) => l || Boolean(r), false);
+    placeOrder(cart, products, userInfo, preventOrder, setSnackMsg, snackMsg);
+  }
+  return (
+    <TableRow>
+      <TableCell colSpan={4}>
+        <Stack
+          spacing={2}
+          component="form"
+          autoComplete="off"
+          onSubmit={onSubmit}
+        >
+          <TextField
+            error={nameError}
+            placeholder="John Doe"
+            label="Full Name"
+            inputProps={{ "aria-label": "input full name" }}
+            value={userInfo.name}
+            onChange={(e) => modify(e, "name")}
+          />
+          <TextField
+            error={emailError}
+            placeholder="email@example.com"
+            label="Email Address"
+            inputProps={{ "aria-label": "input a valid email address" }}
+            onChange={(e) => modify(e, "email")}
+            value={userInfo.email}
+          />
+          {children}
+        </Stack>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+export function ShoppingCart({ cart, products, taxRate, userInfoState }) {
   const [cartDetails, setCartDetails] = useState([]);
+  const [formValid, setFormValid] = useState(false);
+  const [snackMsg, setSnackMsg] = useState(undefined);
 
   const [math, setMath] = useState({
     subtotal: 0,
@@ -147,11 +173,7 @@ export function ShoppingCart({ cart, products, taxRate }) {
     total: 0,
   });
 
-  const [userInfo, setUserInfo] = useState({
-    name: "John Doe",
-    email: "j.doe@gmail.com",
-  });
-
+  const [userInfo, setUserInfo] = userInfoState;
   useEffect(() => {
     const ids = Object.keys(cart);
     getProductDetails(ids, setCartDetails);
@@ -214,26 +236,24 @@ export function ShoppingCart({ cart, products, taxRate }) {
               <TableCell colSpan={3}>Total</TableCell>
               <TableCell>{math.total}</TableCell>
             </TableRow>
+            <FormRow
+              setUserInfo={setUserInfo}
+              userInfo={userInfo}
+              setFormValid={setFormValid}
+              snackMsg={snackMsg}
+              setSnackMsg={setSnackMsg}
+              cart={cart}
+              products={products}
+            >
+              <PlaceOrderButton type="submit" />
+            </FormRow>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell colSpan={3}>{userInfo.name}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Email</TableCell>
-              <TableCell colSpan={3}>{userInfo.email}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={4}>
-                <PlaceOrderButton
-                  cart={cart}
-                  products={products}
-                  userInfo={userInfo}
-                />
-              </TableCell>
+              <TableCell colSpan={4}></TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
+      <OrderingSnackbar setSnackMsg={setSnackMsg} snackMsg={snackMsg} />
     </Stack>
   );
 }

@@ -145,5 +145,36 @@
       "price": 999.99
     }
   ],
-  "purchases": []
+  "purchases": [
+    {
+      "name": "Joe Doe",
+      "email": "joe@doe.com",
+      "total": 1.076625,
+      "receipt": {
+        "userInfo": {
+          "name": "Joe Doe",
+          "email": "joe@doe.com"
+        },
+        "lines": [
+          "Showing receipt for Joe Doe available at joe@doe.com:",
+          "1 total Rice Krispies purchased at a cost of $0.99 for a total cost of $0.99.",
+          "Before taxes, the subtotal was $0.99",
+          "After taxes and fees were applied, the total comes out to $1.08"
+        ],
+        "productRows": [
+          {
+            "id": 1,
+            "name": "Rice Krispies",
+            "category": "food",
+            "image": "https://upload.wikimedia.org/wikipedia/commons/c/cd/RKTsquares.jpg",
+            "source": "https://en.wikipedia.org/wiki/Rice_Krispies_Treats",
+            "description": "Delicious corn-based rice grains melted together with marshmallows into a square-like shape.",
+            "price": 0.99,
+            "quantity": 1,
+            "totalPrice": 0.99
+          }
+        ]
+      }
+    }
+  ]
 }
