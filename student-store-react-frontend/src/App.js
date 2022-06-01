@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { getTaxRate } from "./utils/api-utils";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { ShoppingCart } from "./components/ShoppingCart/ShoppingCart";
+import Modal from "@mui/material/Modal";
+import ProductViewModal from "./components/ProductViewModal";
 
 const darkTheme = createTheme({
   palette: {
@@ -21,6 +23,7 @@ function App() {
   const closeDrawer = () => setDrawer(false);
   const [cart, setCart] = useState({});
   const [products, setProducts] = useState(undefined);
+  const [activeProduct, setActiveProduct] = useState(undefined);
 
   useEffect(() => {
     getTaxRate(setTaxRate);
@@ -50,10 +53,15 @@ function App() {
           cart={cart}
           products={products}
           setProducts={setProducts}
+          setActiveProduct={setActiveProduct}
         />
         <Drawer open={drawer} onClose={() => setDrawer(false)} anchor="left">
           <ShoppingCart cart={cart} products={products} taxRate={taxRate} />
         </Drawer>
+        <ProductViewModal
+          activeProduct={activeProduct}
+          setActiveProduct={setActiveProduct}
+        />
       </ThemeProvider>
     </div>
   );

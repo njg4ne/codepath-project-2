@@ -12,6 +12,7 @@ export default function ProductGrid({
   cart,
   products,
   setProducts,
+  setActiveProduct,
 }) {
   // const [products, setProducts] = useState(undefined);
   useEffect(() => {
@@ -25,12 +26,17 @@ export default function ProductGrid({
               onCartChange(p.id, quantityChange);
             };
             const cartQuantity = cart[p.id] ? cart[p.id] : 0;
+            const onActivate = () => {
+              console.log("activating");
+              setActiveProduct(p);
+            };
             return (
               <Card className="PreviewCanvas" elevation={5} key={p.id}>
                 <ProductPreview
                   data={p}
                   onUpdateItemQuant={updateItemQuant}
                   itemQuant={cartQuantity}
+                  onActivate={onActivate}
                 />
               </Card>
             );

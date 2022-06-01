@@ -4,13 +4,12 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import { useState, useEffect } from "react";
 import { getFormattedPrice } from "../../utils/api-utils";
-
-const PLACEHOLDER_URL =
-  "https://www.aaronfaber.com/wp-content/uploads/2017/03/product-placeholder-wp.jpg";
+import ProductImage from "../ProductImage";
 
 function Hstack(props) {
   return (
@@ -27,7 +26,7 @@ function Vstack({ children }) {
   return <Stack direction="column" spacing={1} children={children} />;
 }
 
-function Billboard({ onPlus, onMinus, numInCart, name, price }) {
+function Billboard({ onPlus, onMinus, onView, numInCart, name, price }) {
   function Plus() {
     return (
       <IconButton size="large" aria-label="add one to cart" onClick={onPlus}>
@@ -46,8 +45,33 @@ function Billboard({ onPlus, onMinus, numInCart, name, price }) {
       </IconButton>
     ) : null;
   }
+  function View() {
+    return (
+      <Box
+        sx={{
+          border: "2px solid black",
+          borderRadius: "0.5em",
+          bgcolor: "turquoise",
+          color: "red",
+        }}
+      >
+        <IconButton
+          size="large"
+          aria-label="view details one to cart"
+          onClick={onView}
+          sx={{ py: "0.125em", px: "0.25em" }}
+        >
+          <VisibilityIcon sx={{ fill: "black" }} />
+        </IconButton>
+      </Box>
+    );
+  }
 
-  const rowOne = <Typography variant="h5">{name}</Typography>;
+  const rowOne = (
+    <Hstack>
+      <Typography variant="h5">{name}</Typography> {View()}
+    </Hstack>
+  );
   const buttons = (
     <Hstack spacing={0}>
       {Plus()} {Minus()}
@@ -75,7 +99,12 @@ function Billboard({ onPlus, onMinus, numInCart, name, price }) {
   );
 }
 
-export default function ProductPreview({ data, onUpdateItemQuant, itemQuant }) {
+export default function ProductPreview({
+  data,
+  onUpdateItemQuant,
+  itemQuant,
+  onActivate,
+}) {
   const { image, price, description, name } = data;
   const [inCart, setInCart] = useState(0);
   const [formattedPrice, setPrice] = useState(price);
@@ -89,22 +118,19 @@ export default function ProductPreview({ data, onUpdateItemQuant, itemQuant }) {
     getFormattedPrice(price, setPrice);
   }, []);
 
-  function PreviewImage({ source, altText }) {
-    const src = source ? source : PLACEHOLDER_URL;
-    const fallback = (e) => (e.target.src = PLACEHOLDER_URL);
-    let jsx = <img alt={altText} src={source} onError={fallback} />;
-    return jsx;
-  }
   let jsx = (
-    <Vstack>
+    <Vstack alignItems="flex-start">
       <Billboard
         price={formattedPrice}
         name={name}
         numInCart={itemQuant}
         onPlus={inc}
         onMinus={dec}
+        onView={onActivate}
       />
-      {PreviewImage({ source: image })}
+      <Hstack>
+        {ProductImage({ source: image, altText: `Image of product: ${name}` })}
+      </Hstack>
     </Vstack>
   );
   return jsx;

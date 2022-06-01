@@ -18,7 +18,8 @@
 
 img {
   /* max-height: var(--img-y); */
-  height: max(15vh, calc(667px/4));
+  height: max(15vh, calc(667px / 4));
+  width: auto;
   border: 0.125em solid black;
   outline: 0.125em solid white;
 }
