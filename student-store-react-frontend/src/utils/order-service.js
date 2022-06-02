@@ -1,4 +1,5 @@
 import { Stack, Typography } from "@mui/material";
+import Receipt from "../components/Receipt";
 import { sendOrder } from "./api-utils";
 
 export function placeOrder(
@@ -52,13 +53,7 @@ export function placeOrder(
     const receiptView = (lines) => (
       <Stack spacing={2}>
         <Typography variant="h5">Order Succeeded!</Typography>
-        {lines.map((line, idx) => {
-          return (
-            <Typography variant="h6" key={idx}>
-              {line}
-            </Typography>
-          );
-        })}
+        {Receipt(lines)}
       </Stack>
     );
 

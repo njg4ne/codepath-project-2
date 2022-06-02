@@ -3,6 +3,10 @@ import axios from "axios";
 import { API_URL } from "./constants";
 import { formatPrice } from "./formatting";
 
+String.prototype.urlFriendly = function () {
+  return this.replace(/ /g, "+");
+};
+
 export function loadProducts(setter) {
   axios
     .get(`${API_URL}store`)
@@ -11,6 +15,31 @@ export function loadProducts(setter) {
       setter(prods);
     })
     .catch((err) => console.log(err));
+}
+
+export function loadOrders(setter) {
+  axios
+    .get(`${API_URL}orders`)
+    .then((resp) => resp.data.orders)
+    .then((orders) => {
+      setter(orders);
+    })
+    .catch((err) => console.log(err));
+}
+
+export function getMyOrders(name, email, setResp, setErr) {
+  axios
+    .get(
+      `${API_URL}orders/q/name=${name.urlFriendly()}&email=${email.urlFriendly()}`
+    )
+    .then((resp) => resp.data.orders)
+    .then((orders) => {
+      setResp(orders);
+    })
+    .catch((err) => {
+      const message = err.response.data.error.message || "Unknown API Error";
+      setErr(message);
+    });
 }
 
 export function getProductDetails(ids, setter) {

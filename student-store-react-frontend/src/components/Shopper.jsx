@@ -6,8 +6,10 @@ import { useState, useEffect } from "react";
 import { getTaxRate } from "../utils/api-utils";
 import ShoppingCart from "./ShoppingCart";
 import ProductViewModal from "./ProductViewModal";
+import { Routes, Route } from "react-router-dom";
+import { OrderGrid } from "./Orders";
 
-export default function Shopper() {
+export default function Shopper({ drawerState }) {
   const [taxRate, setTaxRate] = useState(0);
   const [drawer, setDrawer] = useState(false);
   const [cart, setCart] = useState({});
@@ -37,17 +39,36 @@ export default function Shopper() {
     setCart(newCart);
   };
 
+  const landing = (
+    <ProductGrid
+      onCartChange={updateCart}
+      cart={cart}
+      products={products}
+      setProducts={setProducts}
+      setActiveProduct={setActiveProduct}
+    />
+  );
+
+  const orders = (
+    <OrderGrid
+      userInfo={userInfoState[0]}
+      setUserInfo={userInfoState[1]}
+    ></OrderGrid>
+  );
+
   return (
-    <Stack sx={{ minHeight: "100vh", bgcolor: "black" }}>
-      <Navbar onCartToggle={() => setDrawer(!drawer)} />
-      <ProductGrid
-        onCartChange={updateCart}
-        cart={cart}
-        products={products}
-        setProducts={setProducts}
-        setActiveProduct={setActiveProduct}
-      />
-      <Drawer open={drawer} onClose={() => setDrawer(false)} anchor="left">
+    <Stack sx={{ flex: 1 }}>
+      <Navbar onToggleDrawer={() => setDrawer(!drawer)} />
+      <Routes>
+        <Route path="/" element={landing}></Route>
+        <Route path="/orders" element={orders}></Route>
+      </Routes>
+      <Drawer
+        open={drawer}
+        onClose={() => setDrawer(false)}
+        anchor="left"
+        maxWidth={"10px"}
+      >
         <ShoppingCart
           cart={cart}
           products={products}
