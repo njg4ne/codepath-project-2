@@ -12,30 +12,30 @@ Deployed Application (optional): [Student Store Deployed Site](ADD_LINK_HERE)
 
 #### REQUIRED FEATURES
 
-- [ ] The API should contain an endpoint that serves an array of all products in the store
-- [ ] An endpoint should exist for creating orders and saving them to a JSON file. Each order should contain the email of the person placing the order, the items associated with the order, and the quantity of each item purchased.
-- [ ] A Store model should handle all data management logic for the API and be the interface for read/write operations to the JSON file.
-- [ ] The frontend should include a landing page that displays the products available for purchase.
-- [ ] There should be a `Sidebar` component that appears on every page and has two states - `open` and `closed`. When the sidebar is opened, it should display a shopping cart of all the products the user currently has in their cart. It should also calculate and display the total amount in dollars for the checked-out items. When it's closed, the sidebar should be much thinner and not display its internal content.
-- [ ] Each product should have an individual page that shows the details of the product and allows the user to add that product to their shopping cart.
-- [ ] A checkout form should be available that allows the user to enter their email and send their order to the API.
+- [x] The API should contain an endpoint that serves an array of all products in the store
+- [x] An endpoint should exist for creating orders and saving them to a JSON file. Each order should contain the email of the person placing the order, the items associated with the order, and the quantity of each item purchased.
+- [x] A Store model should handle all data management logic for the API and be the interface for read/write operations to the JSON file.
+- [x] The frontend should include a landing page that displays the products available for purchase.
+- [x] ~~There should be a `Sidebar` component that appears on every page and has two states - `open` and `closed`. When the sidebar is opened, it should display a shopping cart of all the products the user currently has in their cart. It should also calculate and display the total amount in dollars for the checked-out items. When it's closed, the sidebar should be much thinner and not display its internal content.~~ Drawer component
+- [x] Each product should have an individual ~~page~~ modal that shows the details of the product and allows the user to add that product to their shopping cart.
+- [x] A checkout form should be available that allows the user to enter their email and send their order to the API.
 
 #### STRETCH FEATURES
 
-- [ ] Deploy your website with Heroku & Surge. 
-- [ ] Create an endpoint that serves only a single product based on the product's id
-- [ ] Create an endpoint for fetching all orders in the database, and an endpoint for serving an individual order based on its id.
-- [ ] Build a page in the UI that displays the list of all past orders and lets the user click on any individual order to take them to a more detailed page of the transaction.
-- [ ] Allow users to use an input to filter orders by the email of the person who placed the order.
+- ~~[ ] Deploy your website with Heroku & Surge. ~~
+- [x] Create an endpoint that serves only a single product based on the product's id
+- [x] Create an endpoint for fetching all orders in the database, and an endpoint for serving an individual order based on its id.
+- [x] Build a page in the UI that displays the list of all past orders and lets the user click on any individual order to take them to a more detailed page of the transaction.
+- [x] Allow users to use an input to filter orders by the email of the person who placed the order.
 
 ### Walkthrough Video
 
-`TODO://` Add the embedded URL code to your animated app walkthrough below, `ADD_EMBEDDED_CODE_HERE`. Make sure the video or gif actually renders and animates when viewing this README. (🚫 Remove this paragraph after adding walkthrough video)
 
-`ADD_EMBEDDED_CODE_HERE`
+
+https://user-images.githubusercontent.com/89935777/171714806-7af221dd-71ee-4481-a13a-85f0eeb46002.mp4
 
 ### Reflection
-
+~~
 * Did the topics discussed in your labs prepare you to complete the assignment? Be specific, which features in your weekly assignment did you feel unprepared to complete?
 
 Add your response here
@@ -46,11 +46,12 @@ Add your response here
 
 * Reflect on your project demo, what went well? Were there things that maybe didn't go as planned? Did you notice something that your peer did that you would like to try next time?
 
-Add your response here
+Add your response here~~
 
 ### Open-source libraries used
 
-- Add any links to open-source libraries used in your project.
+- https://mui.com/
+- https://www.npmjs.com/package/nodemon
 
 ### Shout out
 
